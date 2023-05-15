@@ -68,25 +68,31 @@ class WIFIChange():
         # self.d.click(0.5, 0.06)
         self.d(description="更多设置").click()
         time.sleep(1)
-        s = self.d(text='设备信息')
-        if s.exists(timeout=5):
-            s.click()
-            time.sleep(1)
-            if self.d(text="Wi-Fi").exists(timeout=2):
-                self.d(text='Wi-Fi').click()
-        else:
-            self.settingIn()
+        if typed == 'P50':
+            s = self.d(text='设备信息')
+            if s.exists(timeout=5):
+                s.click()
+                time.sleep(1)
+                if self.d(text="Wi-Fi").exists(timeout=2):
+                    self.d(text='Wi-Fi').click()
+        elif typed == 'U' or typed == 'P1' or typed == 'Y':
+            if self.d(text="网络设置").exists(timeout=2):
+                    self.d(text='网络设置').click()
 
     def switchWIFI(self):
         global flag,t,connect_flag,connect,wifi_index,WIFI_List,success,refresh_overtime,WIFI_PWD
-        if self.d(text="Wi-Fi").exists(timeout=2):  
-            self.d(text='Wi-Fi').click()
-        if self.d(text='已连接').exists(timeout=15):
-            if not self.d(text='更换Wi-Fi').exists:
-                self.d.swipe_ext("up", scale=0.6)
-            self.d(text='更换Wi-Fi').click()
-        else:
-            pass
+        if typed == 'P50':
+            if self.d(text="Wi-Fi").exists(timeout=2):  
+                self.d(text='Wi-Fi').click()
+            if self.d(text='已连接').exists(timeout=15):
+                if not self.d(text='更换Wi-Fi').exists:
+                    self.d.swipe_ext("up", scale=0.6)
+                self.d(text='更换Wi-Fi').click()
+            else:
+                pass
+        elif typed == 'U' or typed == 'P1'or typed == 'Y' :
+            if  self.d(text='更换Wi-Fi').exists:   
+                self.d(text='更换Wi-Fi').click()
         t1 = threading.Thread(target=self.getBluetooth)
         t1.start()
         if self.d(text='选择Wi-Fi',index=0).exists(timeout=45):
@@ -240,7 +246,7 @@ class WIFIChange():
         global com,flag,connect,WIFI_List,wifi_index
         btime = time.time()
         if com !='':
-            ser = serial.Serial(com,'1500000',timeout=0.00001)
+            ser = serial.Serial(com,'115200',timeout=0.00001)
         while True:
             etime = time.time()
             if etime - btime >= 60:
@@ -252,10 +258,16 @@ class WIFIChange():
                 if rsp != '':
                     self.write_log(write_info=rsp,logname=com+'_'+currentTime+'.log')
                 if rsp != '':
-                    success_flag = re.findall("My Lan IP : "+WIFI_IP_List[wifi_index],rsp)
-                    wifi_a = re.findall("My Lan IP : "+WIFI_IP_List[0],rsp)
-                    wifi_b = re.findall("My Lan IP : "+WIFI_IP_List[1],rsp)
-                    wifi_c = re.findall("My Lan IP : "+WIFI_IP_List[2],rsp)
+                    if typed == 'P50':
+                        success_flag = re.findall("My Lan IP : "+WIFI_IP_List[wifi_index],rsp)
+                        wifi_a = re.findall("My Lan IP : "+WIFI_IP_List[0],rsp)
+                        wifi_b = re.findall("My Lan IP : "+WIFI_IP_List[1],rsp)
+                        wifi_c = re.findall("My Lan IP : "+WIFI_IP_List[2],rsp)
+                    if typed == 'P1' or typed == 'Y' or typed == 'U':
+                        success_flag = re.findall("prepare online event information ip="+WIFI_IP_List[wifi_index],rsp)
+                        wifi_a = re.findall("online event information ip="+WIFI_IP_List[0],rsp)
+                        wifi_b = re.findall("online event information ip="+WIFI_IP_List[1],rsp)
+                        wifi_c = re.findall("online event information ip="+WIFI_IP_List[2],rsp)
                     if success_flag:
                         self.logger.info(WIFI_List[wifi_index]+u'连接成功')
                         break
@@ -278,28 +290,29 @@ if __name__ == '__main__':
     refresh = 0
     refresh_overtime = False
     success = 0
-    plu = '云鹿智能门P50'
+    typed = 'Y'
+    plu = '云鹿智能门Y'
     fileName = '-switch_wifi-'
-    WIFI_A = 'Redmi_7298'
-    WIFI_B = 'NovaDoor'
+    WIFI_A = 'NovaDoor'
+    WIFI_B = 'yunding'
     WIFI_C = 'yunlu'
     # WIFI_C = 'Redmi'
     # WIFI_D = 'yunlu2'
     # WIFI_E = 'yunlu'
-    WIFI_A_pwd = '147258369'
+    WIFI_A_pwd = '12345687'
     WIFI_B_pwd = '12345687'
     WIFI_C_pwd = 'YunluDoor0755'
-    WIFI_A_IP = '192.168.28.109'
-    WIFI_B_IP = '192.168.50.231'
-    WIFI_C_IP = '192.168.0.115'
+    WIFI_A_IP = '192.168.50.39'
+    WIFI_B_IP = '192.168.0.142'
+    WIFI_C_IP = '10.7.6.240'
     WIFI_List = [WIFI_A,WIFI_B,WIFI_C]
-    WIFI_IP_List = [WIFI_A_IP,WIFI_B_IP,WIFI_C_IP]
-    WIFI_PWD = [WIFI_A_pwd,WIFI_B_pwd,WIFI_C_pwd]
+    WIFI_IP_List = [WIFI_A,WIFI_B_IP,WIFI_C_IP]
+    WIFI_PWD = [WIFI_B_pwd,WIFI_C_pwd]
     wifi_index = 0
     flag = WIFI_List[0]
     connect_flag = 0
     connect = 0
-    com = 'com18'
+    com = 'com16'
     r = WIFIChange()
 
     while True:
